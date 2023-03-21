@@ -1,7 +1,9 @@
 package uk.gov.dwp.uc.pairtest;
 
 import thirdparty.paymentgateway.TicketPaymentService;
+import thirdparty.paymentgateway.TicketPaymentServiceImpl;
 import thirdparty.seatbooking.SeatReservationService;
+import thirdparty.seatbooking.SeatReservationServiceImpl;
 import uk.gov.dwp.uc.pairtest.domain.TicketTypeRequest;
 import uk.gov.dwp.uc.pairtest.exception.InvalidPurchaseException;
 
@@ -14,20 +16,24 @@ public class TicketServiceImpl implements TicketService {
      * Should only have private methods other than the one below.
      */
 
-    private SeatReservationService seatReservationService;
-    private TicketPaymentService ticketPaymentService;
+
+    private SeatReservationService seatReservationService = new SeatReservationServiceImpl();
+    private TicketPaymentService ticketPaymentService = new TicketPaymentServiceImpl();
 
     @Override
-    public void purchaseTickets(Long accountId, TicketTypeRequest... ticketTypeRequests) throws InvalidPurchaseException {
+    public ResponseObject purchaseTickets(Long accountId, TicketTypeRequest... ticketTypeRequests) throws InvalidPurchaseException {
+        int totalNoOfSeats = 0;
+        int totalAmountToPay = 0;
         if(ticketTypeRequests.length <= 20){
-            int totalAmountToPay = calculateTotalCost(ticketTypeRequests);
-            int totalNoOfSeats = calculateNoOfSeats(ticketTypeRequests);
+            totalAmountToPay = calculateTotalCost(ticketTypeRequests);
+            totalNoOfSeats = calculateNoOfSeats(ticketTypeRequests);
             ticketPaymentService.makePayment(accountId,totalAmountToPay);
             seatReservationService.reserveSeat(accountId,totalNoOfSeats);
         }
         else {
             throw new InvalidPurchaseException("Maximum number of tickets purchase exceeded");
         }
+        return new ResponseObject(totalNoOfSeats,totalAmountToPay);
     }
 
 
