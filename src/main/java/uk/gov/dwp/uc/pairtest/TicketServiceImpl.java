@@ -18,20 +18,22 @@ public class TicketServiceImpl implements TicketService {
     private TicketPaymentService ticketPaymentService = new TicketPaymentServiceImpl();
 
     @Override
-    public ResponseObject purchaseTickets(Long accountId, TicketTypeRequest... ticketTypeRequests) throws InvalidPurchaseException {
-        int totalNoOfSeats = 0;
-        int totalAmountToPay = 0;
-        if(ticketTypeRequests.length <= 20){
-            totalAmountToPay = calculateTotalCost(ticketTypeRequests);
-            totalNoOfSeats = calculateNoOfSeats(ticketTypeRequests);
+    public void purchaseTickets(Long accountId, TicketTypeRequest... ticketTypeRequests) throws InvalidPurchaseException {
+        int totalAmountToPay = calculateTotalCost(ticketTypeRequests);
+        int totalNoOfSeats = calculateNoOfSeats(ticketTypeRequests);
+        int totalNoOfTickets = calculateTotalNumberOfTickets(ticketTypeRequests);
+        if(totalNoOfTickets <= 20){
+            confirmAdultTicketOnPurchase(ticketTypeRequests);
             ticketPaymentService.makePayment(accountId,totalAmountToPay);
             seatReservationService.reserveSeat(accountId,totalNoOfSeats);
         }
         else {
-            throw new InvalidPurchaseException("Maximum number of tickets purchase exceeded");
+            throw new InvalidPurchaseException("Only a maximum of 20 tickets that can be purchased at a time");
         }
-        return new ResponseObject(totalNoOfSeats,totalAmountToPay);
+
     }
+
+
 
 
     private int getTicketPrice(TicketTypeRequest.Type ticketTypeRequest){
@@ -65,13 +67,21 @@ public class TicketServiceImpl implements TicketService {
         return totalAmount;
     }
 
-    private boolean checkForAdultTicketPurchaseList(TicketTypeRequest... ticketTypeRequests){
+    private boolean checkForAdultTicketOnPurchaseList(TicketTypeRequest... ticketTypeRequests){
         return Arrays.stream(ticketTypeRequests).filter(ticket -> ticket.getTicketType().equals(ADULT)).findAny().isPresent();
+    }
+
+    private boolean checkForChildTicketOnPurchaseList(TicketTypeRequest... ticketTypeRequests){
+        return Arrays.stream(ticketTypeRequests).filter(ticket -> ticket.getTicketType().equals(CHILD)).findAny().isPresent();
+    }
+
+    private boolean checkForInfantTicketOnPurchaseList(TicketTypeRequest... ticketTypeRequests){
+        return Arrays.stream(ticketTypeRequests).filter(ticket -> ticket.getTicketType().equals(INFANT)).findAny().isPresent();
     }
 
     private int calculateNoOfSeats(TicketTypeRequest... ticketTypeRequests){
         int noOfSeats = 0;
-        boolean confirmAdultTicket = checkForAdultTicketPurchaseList(ticketTypeRequests);
+        boolean confirmAdultTicket = checkForAdultTicketOnPurchaseList(ticketTypeRequests);
 
         for(TicketTypeRequest ticketTypeRequest: ticketTypeRequests){
 
@@ -93,6 +103,27 @@ public class TicketServiceImpl implements TicketService {
     }
 
 
+    private int calculateTotalNumberOfTickets(TicketTypeRequest... ticketTypeRequests) {
+        int totalNoOfTickets = 0;
+        for(TicketTypeRequest ticketTypeRequest: ticketTypeRequests){
+            int amountOfTicketsPerType = ticketTypeRequest.getNoOfTickets();
+            totalNoOfTickets = totalNoOfTickets + amountOfTicketsPerType;
+        }
+        return totalNoOfTickets;
+    }
+
+    private void confirmAdultTicketOnPurchase(TicketTypeRequest... ticketTypeRequests){
+        boolean childTicketIsPresent = checkForChildTicketOnPurchaseList(ticketTypeRequests);
+        boolean adultTicketIsPresent = checkForAdultTicketOnPurchaseList(ticketTypeRequests);
+        boolean infantTicketIsPresent = checkForInfantTicketOnPurchaseList(ticketTypeRequests);
+        if (childTicketIsPresent == true || infantTicketIsPresent == true){
+            if(adultTicketIsPresent != true){
+                throw new InvalidPurchaseException("Child and Infant tickets cannot be purchased without purchasing an Adult ticket");
+            }
+
+        }
+
+    }
 
 
 }

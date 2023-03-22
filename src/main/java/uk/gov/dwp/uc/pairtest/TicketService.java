@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface TicketService {
 
-    ResponseObject purchaseTickets(Long accountId, TicketTypeRequest... ticketTypeRequests) throws InvalidPurchaseException;
+    void purchaseTickets(Long accountId, TicketTypeRequest... ticketTypeRequests) throws InvalidPurchaseException;
 
 }
