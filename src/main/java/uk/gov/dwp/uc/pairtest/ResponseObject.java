@@ -19,6 +19,11 @@ public class ResponseObject {
         return totalAmountCost;
     }
 
-
-
+    @Override
+    public String toString() {
+        return "ResponseObject{" +
+                "noOfSeats=" + noOfSeats +
+                ", totalAmountCost=" + totalAmountCost +
+                '}';
+    }
 }

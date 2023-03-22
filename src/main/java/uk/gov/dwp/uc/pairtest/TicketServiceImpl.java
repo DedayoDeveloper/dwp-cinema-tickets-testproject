@@ -6,16 +6,13 @@ import thirdparty.seatbooking.SeatReservationService;
 import thirdparty.seatbooking.SeatReservationServiceImpl;
 import uk.gov.dwp.uc.pairtest.domain.TicketTypeRequest;
 import uk.gov.dwp.uc.pairtest.exception.InvalidPurchaseException;
-
 import java.util.Arrays;
-
 import static uk.gov.dwp.uc.pairtest.domain.TicketTypeRequest.Type.*;
 
 public class TicketServiceImpl implements TicketService {
     /**
      * Should only have private methods other than the one below.
      */
-
 
     private SeatReservationService seatReservationService = new SeatReservationServiceImpl();
     private TicketPaymentService ticketPaymentService = new TicketPaymentServiceImpl();
@@ -68,6 +65,10 @@ public class TicketServiceImpl implements TicketService {
         return totalAmount;
     }
 
+    private boolean checkForAdultTicketPurchaseList(TicketTypeRequest... ticketTypeRequests){
+        return Arrays.stream(ticketTypeRequests).filter(ticket -> ticket.getTicketType().equals(ADULT)).findAny().isPresent();
+    }
+
     private int calculateNoOfSeats(TicketTypeRequest... ticketTypeRequests){
         int noOfSeats = 0;
         boolean confirmAdultTicket = checkForAdultTicketPurchaseList(ticketTypeRequests);
@@ -91,9 +92,7 @@ public class TicketServiceImpl implements TicketService {
         return noOfSeats;
     }
 
-    private boolean checkForAdultTicketPurchaseList(TicketTypeRequest... ticketTypeRequests){
-        return Arrays.stream(ticketTypeRequests).filter(ticket -> ticket.getTicketType().equals(ADULT)).findAny().isPresent();
-    }
+
 
 
 }
