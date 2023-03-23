@@ -11,7 +11,7 @@ public class TicketServiceTests {
     @Test
     public void purchaseTickets() {
         TicketService ticketService = new TicketServiceImpl();
-        Long accountId = Long.valueOf(100892093);
+        Long accountId = Long.valueOf(100);
         TicketTypeRequest t = new TicketTypeRequest(ADULT,2);
         TicketTypeRequest t2 = new TicketTypeRequest(CHILD,2);
         TicketTypeRequest t3 = new TicketTypeRequest(INFANT,1);

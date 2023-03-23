@@ -19,6 +19,9 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     public void purchaseTickets(Long accountId, TicketTypeRequest... ticketTypeRequests) throws InvalidPurchaseException {
+        if (accountId <= 0){
+            throw new InvalidPurchaseException("Invalid account details");
+        }
         int totalAmountToPay = calculateTotalCost(ticketTypeRequests);
         int totalNoOfSeats = calculateNoOfSeats(ticketTypeRequests);
         int totalNoOfTickets = calculateTotalNumberOfTickets(ticketTypeRequests);
@@ -32,8 +35,6 @@ public class TicketServiceImpl implements TicketService {
         }
 
     }
-
-
 
 
     private int getTicketPrice(TicketTypeRequest.Type ticketTypeRequest){
